@@ -4,7 +4,7 @@
 import argparse
 import socket
 from scapy.all import *
-
+from datetime import *
 
 def parseFromFile(pcapFile, bpf):
     print('reading from file {}\n'.format(pcapFile))
@@ -22,12 +22,36 @@ def evaluatePacket(pkt):
     load_layer('http')
     
     #print('- - - -'pkt.summary())
-
+    timestamp = ''
+    proto = ''
+    txt = ''
     if pkt.haslayer(TLS):
-        print('TLS PACKET: {} {}'.format(time.ctime(pkt.time),pkt.summary()))
-    elif pkt.haslayer(HTTP):
-        print('HTTP PACKET: {} {}'.format(time.ctime(pkt.time), pkt.summary()))
-    return
+        proto = 'TLS'
+        txt = '{}'.format(pkt.summary())
+    elif pkt.haslayer(HTTP) and pkt.haslayer(HTTPRequest):
+        proto = 'HTTP'
+        if pkt[HTTP].Method == b'POST':
+            request = 'POST'
+        elif pkt[HTTP].Method == b'GET':
+            request = 'GET'
+        else:
+            return
+
+        host = pkt[HTTP][HTTPRequest].Host
+        path = pkt[HTTP][HTTPRequest].Path
+        txt = '{}\t{}\t{}'.format(host, request, path)
+    else:
+        return
+
+    timestamp = (datetime.fromtimestamp(pkt.time)).isoformat(' ', timespec='microseconds')
+
+    src = pkt[IP].src
+    sport = pkt[IP].sport
+
+    dst = pkt[IP].dst
+    dport = pkt[IP].dport
+
+    return '{}\t{}\t{}:{} -> {}:{}\t{}'.format(timestamp, proto, src, sport, dst, dport, txt)
 
 def main():
     print('Starting sniffer.py')

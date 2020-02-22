@@ -35,7 +35,7 @@ def main():
     
     whereToReadFrom.add_argument('-r', nargs=1, metavar='file.cap', help='specify pcap to read from')
 
-    parser.add_argument('-e', nargs=1, metavar='BPF', help='specify BPF expression')
+    parser.add_argument('-e', metavar='BPF', help='specify BPF expression')
     
     parsed = parser.parse_args()
     print(parsed)

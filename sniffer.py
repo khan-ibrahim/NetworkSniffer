@@ -18,7 +18,15 @@ def sniffLive(interfaceName, bpf):
 
 def evaluatePacket(pkt):
     #print('evaluating packet {}'.format(pkt)) 
-    print(pkt.summary())
+    load_layer('tls')
+    load_layer('http')
+    
+    #print('- - - -'pkt.summary())
+
+    if pkt.haslayer(TLS):
+        print('TLS PACKET: {} {}'.format(time.ctime(pkt.time),pkt.summary()))
+    elif pkt.haslayer(HTTP):
+        print('HTTP PACKET: {} {}'.format(time.ctime(pkt.time), pkt.summary()))
     return
 
 def main():

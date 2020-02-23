@@ -7,12 +7,12 @@ from scapy.all import *
 from datetime import *
 
 def parseFromFile(pcapFile, bpf):
-    print('reading from file {}\n'.format(pcapFile))
+    print('Reading from pcap:{} with bpf:{}\n'.format(pcapFile, bpf))
     sniff(prn=evaluatePacket, filter=bpf, offline=pcapFile, store=0)
     return 0
 
 def sniffLive(interfaceName, bpf):
-    print('sniffing live on interface {}\n'.format(interfaceName))
+    print('Sniffing live with bpf:{}; Interface specified:{}\n'.format(bpf, interfaceName))
     sniff(prn=evaluatePacket, filter=bpf, iface=interfaceName, store=0)
     return 0 
 
@@ -68,7 +68,7 @@ def evaluatePacket(pkt):
     return '{}\t{}{}\t{}:{} -> {}:{}\t{}'.format(timestamp, proto, version, src, sport, dst, dport, txt)
 
 def main():
-    print('Starting sniffer.py')
+    #print('Starting sniffer.py')
     
     #parse args
     # sniffer.py [-i interface] [-r tracefile] [-e expression]
@@ -84,7 +84,7 @@ def main():
     parser.add_argument('-e', metavar='BPF', help='specify BPF expression')
     
     parsed = parser.parse_args()
-    print(parsed)
+    #print(parsed)
 
     load_layer('http')
     load_layer('tls')

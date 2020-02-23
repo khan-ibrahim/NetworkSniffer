@@ -25,9 +25,23 @@ def evaluatePacket(pkt):
     timestamp = ''
     proto = ''
     txt = ''
+    version = ''
     if pkt.haslayer(TLS):
         proto = 'TLS'
-        txt = '{}'.format(pkt.summary())
+        if pkt.haslayer(TLSClientHello):
+
+            versionCode = pkt[TLSClientHello].version
+            
+            versionCodes = [769, 770, 771, 772]
+            versions = ['1.0', '1.1', '1.2', '1.3']
+            if versionCode in versionCodes:
+                version = ' ' + versions[versionCodes.index(versionCode)] + '\t'
+            
+            serverName = pkt[ServerName].servername
+
+            txt = '{}'.format(serverName)
+        else:
+            return
     elif pkt.haslayer(HTTP) and pkt.haslayer(HTTPRequest):
         proto = 'HTTP'
         if pkt[HTTP].Method == b'POST':
@@ -51,7 +65,7 @@ def evaluatePacket(pkt):
     dst = pkt[IP].dst
     dport = pkt[IP].dport
 
-    return '{}\t{}\t{}:{} -> {}:{}\t{}'.format(timestamp, proto, src, sport, dst, dport, txt)
+    return '{}\t{}{}\t{}:{} -> {}:{}\t{}'.format(timestamp, proto, version, src, sport, dst, dport, txt)
 
 def main():
     print('Starting sniffer.py')

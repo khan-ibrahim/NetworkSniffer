@@ -5,6 +5,7 @@ import argparse
 import socket
 from scapy.all import *
 from datetime import *
+import cryptography
 
 def parseFromFile(pcapFile, bpf):
     print('Reading from pcap:{} with bpf:{}\n'.format(pcapFile, bpf))
@@ -36,10 +37,11 @@ def evaluatePacket(pkt):
             versions = ['1.0', '1.1', '1.2', '1.3']
             if versionCode in versionCodes:
                 version = ' ' + versions[versionCodes.index(versionCode)] + '\t'
-            
-            serverName = pkt[ServerName].servername
-
-            txt = '{}'.format(serverName)
+            if pkt.haslayer(ServerName): 
+                serverName = pkt[ServerName].servername
+                txt = '{}'.format(serverName)
+            #else:
+                #txt = pkt.summary()
         else:
             return
     elif pkt.haslayer(HTTP) and pkt.haslayer(HTTPRequest):
@@ -57,7 +59,7 @@ def evaluatePacket(pkt):
     else:
         return
 
-    timestamp = (datetime.fromtimestamp(pkt.time)).isoformat(' ', timespec='microseconds')
+    timestamp = (datetime.fromtimestamp(float(pkt.time))).isoformat(' ', timespec='microseconds')
 
     src = pkt[IP].src
     sport = pkt[IP].sport
